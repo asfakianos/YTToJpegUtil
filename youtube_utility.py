@@ -2,24 +2,25 @@ import os
 import sys
 import cv2
 import datetime
+import argparse
 
 from pytube import YouTube
 
-def main(args):
+
+DEFAULT_FPS = 5
+
+
+def main(url: str, 
+		 frame_rate: int=None, 
+		 dest: str=None):
 	"""
 	Arguments:
 	1. Video URL (required)
 	2. Destination directory (optional) If not specified, saves to video's title + res
 	"""
-	try:
-		url = str(args[0])
-	except:
-		sys.exit("No url provided")
 
-	try:
-		dest = str(args[1])	
-	except:
-		dest = None
+	if not frame_rate:
+		frame_rate = DEFAULT_FPS
 
 	# Reference all of the videos for the given URL with a .mp4 extension
 	mp4 = YouTube(url).streams.filter(file_extension='mp4')
@@ -47,7 +48,7 @@ def main(args):
 
 		if not os.path.isdir(dest):
 			os.mkdir(dest)
-			print(f"Created {dest}")
+			print(f"Created dir \"{dest}\"")
 
 		# Write video metadata to the file
 		with open(os.path.join(dest, f'{title}.META'), 'a') as metafile:
@@ -63,7 +64,9 @@ def main(args):
 			if not success: # End of video
 				break
 
-			cv2.imwrite(os.path.join(dest, f"{frame}.jpg"), image)
+			if frame % frame_rate == 0:
+				cv2.imwrite(os.path.join(dest, f"{frame}.jpg"), image)
+
 			frame += 1
 
 		print(f"Finished writing to {dest}.")
@@ -80,4 +83,15 @@ def main(args):
 
 
 if __name__ == '__main__':
-	main(sys.argv[1:])
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument("url", help="YouTube download link to source video from")
+	parser.add_argument("--f", help="Rate at which frames are extracted from the video, e.g. --f 5 results in 1 per 5 (default 1 in 5)")
+	parser.add_argument("--dest", help="Target destination to output frames. (default ./<title>/)")
+
+	args = parser.parse_args()
+	
+	main(args.url, args.f, args.dest)
+
+
+
