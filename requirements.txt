@@ -1,0 +1,5 @@
+numpy==1.19.4
+opencv-python==4.4.0.46
+pytube==10.1.0
+pytube3==9.6.4
+typing-extensions==3.7.4.3
