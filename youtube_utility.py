@@ -65,6 +65,7 @@ def main(url: str,
 				break
 
 			if frame % frame_rate == 0:
+				image = cv2.resize(image, (461, 461), interpolation=cv2.INTER_AREA)
 				cv2.imwrite(os.path.join(dest, f"{frame}.jpg"), image)
 
 			frame += 1
